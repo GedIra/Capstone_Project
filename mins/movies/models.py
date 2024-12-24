@@ -32,3 +32,60 @@ class User(AbstractUser):
     return self.username
   
 User = get_user_model()
+
+class Movie(models.Model):
+  title = models.CharField(max_length=255)
+  trailer = models.URLField()
+  director = models.CharField(max_length=255)
+  released_date = models.DateField()
+  summary = models.TextField(blank=True, null=True)
+  
+  class Meta:
+    unique_together = ["title", "released_date"]
+  
+
+class Actor(models.Model):
+  name = models.CharField(max_length=255)
+  aka = models.CharField(max_length=100, unique=True, blank=True, null=True)
+  dob = models.DateField(null=True)
+  bio = models.TextField(null=True, blank=True)
+  featured_in = models.ManyToManyField(Movie, related_name='actors')
+  
+class Review(models.Model):
+  SCORE_CHOICES = [
+    (0, 'Terrible'),
+    (1, 'Poor'),
+    (2, 'Fair'),
+    (3, 'Good'),
+    (4, 'Very Good'),
+    (5, 'Excellent')
+  ]
+  author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+  movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='reviews')
+  content = models.TextField()
+  rating = models.IntegerField(choices=SCORE_CHOICES)
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+  
+class Comment(models.Model):
+  author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+  review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='comments')
+  content = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+  
+class Like(models.Model):
+  author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
+  review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='likes')
+  liked_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+  
+  class Meta:
+    unique_together = ['author', 'review'] #user can like a riview once
+    
+
+  
+  
+  
+  
+  
